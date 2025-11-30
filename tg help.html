@@ -1,0 +1,623 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Юридическая консультация</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #2a5298;
+            --primary-dark: #1e3c72;
+            --secondary: #ff6b6b;
+            --accent: #4ecdc4;
+            --gold: #ffd700;
+            --light: #f8f9fa;
+            --dark: #2d3748;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent), var(--primary));
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px dashed #e8e8e8;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '⚖️';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 15px;
+            font-size: 24px;
+        }
+        
+        .legal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .badge-icon {
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+        
+        .header h1 {
+            color: var(--primary-dark);
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 15px 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .feature-text {
+            font-size: 11px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .label-icon {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+            background: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        textarea {
+            height: 140px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        
+        .problem-type {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .type-btn {
+            padding: 15px 10px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.8);
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .type-btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .type-btn.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 6px 20px rgba(42, 82, 152, 0.3);
+        }
+        
+        .type-icon {
+            font-size: 18px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 18px;
+            border-radius: 15px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(42, 82, 152, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(42, 82, 152, 0.5);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .confidentiality {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,249,250,0.9));
+            border-radius: 15px;
+            font-size: 13px;
+            color: #666;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .shield-icon {
+            font-size: 18px;
+            color: var(--accent);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+        .floating-element:nth-child(3) { bottom: 30%; left: 15%; animation-delay: 2s; }
+        .floating-element:nth-child(4) { bottom: 15%; right: 5%; animation-delay: 3s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e8e8e8;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent), var(--primary));
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .problem-type {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element">⚖️</div>
+        <div class="floating-element">📝</div>
+        <div class="floating-element">🔒</div>
+        <div class="floating-element">⚡</div>
+    </div>
+    
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="header">
+            <div class="legal-badge">
+                <span class="badge-icon">⭐</span>
+                ПРОФЕССИОНАЛЬНАЯ ЮРИДИЧЕСКАЯ СЛУЖБА
+            </div>
+            <h1>Напишите свою проблему и мы попытаемся ее решить</h1>
+            <p>Получите квалифицированную юридическую помощь в кратчайшие сроки</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature">
+                <span class="feature-icon">🚀</span>
+                <div class="feature-text">Быстрый ответ</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🎯</span>
+                <div class="feature-text">Точное решение</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🛡️</span>
+                <div class="feature-text">Полная защита</div>
+            </div>
+        </div>
+        
+        <form id="legalForm">
+            <div class="form-group">
+                <label for="fullName">
+                    <span class="label-icon">👤</span>
+                    ФИО *
+                </label>
+                <input type="text" id="fullName" required placeholder="Иванов Иван Иванович">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">
+                    <span class="label-icon">📞</span>
+                    Контактный телефон *
+                </label>
+                <input type="tel" id="phone" required placeholder="+7 (999) 123-45-67">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="label-icon">🏷️</span>
+                    Тип проблемы *
+                </label>
+                <div class="problem-type">
+                    <div class="type-btn" data-type="civil">
+                        <span class="type-icon">🏛️</span>
+                        Гражданское право
+                    </div>
+                    <div class="type-btn" data-type="family">
+                        <span class="type-icon">👨‍👩‍👧‍👦</span>
+                        Семейное право
+                    </div>
+                    <div class="type-btn" data-type="housing">
+                        <span class="type-icon">🏠</span>
+                        Жилищное право
+                    </div>
+                    <div class="type-btn" data-type="labor">
+                        <span class="type-icon">💼</span>
+                        Трудовое право
+                    </div>
+                    <div class="type-btn" data-type="admin">
+                        <span class="type-icon">📋</span>
+                        Административное
+                    </div>
+                    <div class="type-btn" data-type="other">
+                        <span class="type-icon">❓</span>
+                        Другое
+                    </div>
+                </div>
+                <input type="hidden" id="problemType" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="problemDescription">
+                    <span class="label-icon">📝</span>
+                    Описание проблемы *
+                </label>
+                <textarea id="problemDescription" required placeholder="Подробно опишите вашу ситуацию, укажите важные детали, даты, участников конфликта, имеющиеся документы..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="urgency">
+                    <span class="label-icon">⏰</span>
+                    Срочность обработки
+                </label>
+                <select id="urgency">
+                    <option value="normal">🟢 Обычная (ответ в течение 24 часов)</option>
+                    <option value="urgent">🟡 Срочная (ответ в течение 6 часов)</option>
+                    <option value="critical">🔴 Критическая (немедленный ответ)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <span>📨</span>
+                Отправить заявку юристу
+            </button>
+        </form>
+        
+        <div class="confidentiality">
+            <span class="shield-icon">🛡️</span>
+            Вся информация защищена и строго конфиденциальна. Соблюдение адвокатской тайны
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h2>Заявка успешно отправлена!</h2>
+            <p>Ваша проблема передана юристу. Свяжемся с вами в ближайшее время.</p>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        // Анимация прогресс-бара
+        setTimeout(() => {
+            document.getElementById('progressFill').style.width = '100%';
+        }, 500);
+        
+        // Обработка выбора типа проблемы
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('problemType').value = this.dataset.type;
+                
+                // Анимация выбора
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+        
+        // Валидация формы в реальном времени
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '#4ecdc4';
+                    this.style.background = 'rgba(78, 205, 196, 0.05)';
+                } else {
+                    this.style.borderColor = '#e8e8e8';
+                    this.style.background = 'rgba(255,255,255,0.9)';
+                }
+            });
+        });
+        
+        // Отправка формы
+        document.getElementById('legalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!document.getElementById('problemType').value) {
+                tg.showPopup({
+                    title: '⚠️ Внимание',
+                    message: 'Пожалуйста, выберите тип проблемы',
+                    buttons: [{ type: 'ok' }]
+                });
+                return;
+            }
+            
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                problemType: document.getElementById('problemType').value,
+                problemDescription: document.getElementById('problemDescription').value,
+                urgency: document.getElementById('urgency').value,
+                timestamp: new Date().toLocaleString('ru-RU'),
+                user: tg.initDataUnsafe.user || {}
+            };
+            
+            // Показываем анимацию успеха
+            document.getElementById('legalForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Отправляем данные в бота
+            tg.sendData(JSON.stringify(formData));
+            
+            // Закрываем приложение через 3 секунды
+            setTimeout(() => {
+                tg.close();
+            }, 3000);
+        });
+        
+        // Плавное появление элементов
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.form-group, .features-grid, .header');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+        
+        // Инициализация стилей для плавного появления
+        document.querySelectorAll('.form-group, .features-grid, .header').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        });
+    </script>
+</body>
+</html>
